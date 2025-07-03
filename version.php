@@ -27,3 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'local_myplugin';
 $plugin->version   = 2025062800; // YYYYMMDDXX
 $plugin->requires  = 2022041900; // Required Moodle version
+
+$plugin->dependencies = [
+    'local_oauth' => 2023091301,
+];
