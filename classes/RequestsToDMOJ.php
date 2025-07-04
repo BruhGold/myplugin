@@ -45,3 +45,15 @@ class FetchZipFile extends APIRequest {
         parent::__construct($url, $method);
     }
 }
+
+class GetUserDMOJId extends APIRequest {
+    public function __construct($ids = []) {
+        $url = DOMAIN . "/api/v2/moodle-to-dmoj/";
+        $method = "POST";
+        $payload = [ 
+            "provider" => "moodle",
+            "id" => $ids
+        ]; 
+        parent::__construct($url, $method);
+    }
+}

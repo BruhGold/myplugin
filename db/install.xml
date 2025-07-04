@@ -9,12 +9,11 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
         <FIELD NAME="moodle_user_id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false"/>
         <FIELD NAME="dmoj_user_id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false"/>
-        <FIELD NAME="dmoj_username" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="user_dmoj_unique" TYPE="unique" FIELDS="moodle_user_id,dmoj_user_id"/>
-        <KEY NAME="fk_user" TYPE="foreign" FIELDS="moodle_user_id" REFTABLE="user" REFFIELDS="id" ONDELETE="cascade"/>
+        <KEY NAME="fk_user" TYPE="foreign" FIELDS="moodle_user_id" REFTABLE="user" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
   </TABLES>

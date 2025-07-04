@@ -8,3 +8,5 @@ $string['downloadsubmissionshelp'] = 'download submissions?';
 $string['downloadsubmissionshelp_help'] = 'If checked, submissions will be included in the downloaded data.';
 $string['redirecting_to_download_url'] = 'redirecting to download URL...';
 $string['nodownloadurl'] = 'No download URL found. Please try again later.';
+$string['dmoj_link'] = 'Create DMOJ account';
+$string['dmoj_link_success'] = 'DMOJ account linked successfully!';

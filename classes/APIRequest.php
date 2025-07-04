@@ -22,7 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 //$DOMAIN = "http://139.59.105.152";
-define('DOMAIN', 'http://139.59.105.152');
+#define('DOMAIN', 'http://139.59.105.152');
+define('DOMAIN', 'http://192.168.1.127:4000'); // Change this to your DMOJ domain
 define('TOKEN_OBTAIN_SECRET', "secret");
 
 class APIRequest {
