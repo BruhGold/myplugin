@@ -1,6 +1,6 @@
 <?php
 require_once('../../config.php');
-require_once(__DIR__ . '/classes/RequestsToDMOJ.php');
+require_once(__DIR__ . '/classes/requests_to_dmoj.php');
 
 $request = new FetchZipFile(optional_param('download_url', '', PARAM_URL));
 $fileResponse = $request->run();
@@ -23,7 +23,6 @@ if ($fileResponse && isset($fileResponse['body']) && $fileResponse['body']) {
     } else {
         echo $OUTPUT->notification('Failed to write temporary ZIP file.', 'error');
     }
-
 } else {
     echo $OUTPUT->notification('No ZIP data available.', 'error');
 }

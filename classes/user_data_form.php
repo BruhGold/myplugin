@@ -21,13 +21,15 @@
  * @copyright  Dinh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use core\context\user;
+
 require_once("$CFG->libdir/formslib.php");
+require_once(__DIR__ . '/get_unlinked.php');
 
 class UserDataForm extends moodleform {
 
     function definition() {
-        global $CFG;
-       
         $mform = $this->_form;
         // comments
         $mform->addElement('advcheckbox', 'comment_download', 'download comments?', ' ');
@@ -60,7 +62,8 @@ class UserDataForm extends moodleform {
             'IE' => 'Internal Error',
             'SC' => 'Short Circuited',
             'AB' => 'Aborted',
-        ];                                                                                                                                                 
+        ];
+        print_r($choices);                                                                                                                                                 
         $options = array('multiple' => true,);         
         $mform->addElement('autocomplete', 'submission_results', get_string('searcharea', 'search'), $choices, $options);
         $mform->setType('submission_results', PARAM_RAW);
@@ -94,6 +97,29 @@ class UserDataForm extends moodleform {
         */
 
         $this->add_action_buttons(true, 'Prepare new User Data');
+    }
+
+    function validation($data, $files) {
+        return array();
+    }
+}
+
+class UserForceLinkForm extends moodleform {
+
+    function definition() {
+        $mform = $this->_form;
+
+        // User selection
+        $users = get_unlinked_users();
+        $choices = [];
+        foreach ($users as $user) {
+            $choices[$user->id] = $user->id . '.' . $user->username . '(' . $user->email . ' )';
+        }                                                                                                                                    
+        $options = array('multiple' => true,);         
+        $mform->addElement('autocomplete', 'unlinked_users', get_string('searcharea', 'search'), $choices, $options);
+        $mform->setType('unlinked_users', PARAM_RAW);
+
+        $this->add_action_buttons(true, get_string('dmoj_admin_force_link', 'local_myplugin'));
     }
 
     function validation($data, $files) {

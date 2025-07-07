@@ -21,7 +21,7 @@
  * @copyright  Dinh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once(__DIR__ . '/APIRequest.php');
+require_once(__DIR__ . '/api_request.php');
 
 class PrepareDownloadData extends APIRequest {
     public function __construct($payload = []) {
@@ -52,8 +52,16 @@ class GetUserDMOJId extends APIRequest {
         $method = "POST";
         $payload = [ 
             "provider" => "moodle",
-            "id" => $ids
+            "id" => $ids,
         ]; 
-        parent::__construct($url, $method);
+        parent::__construct($url, $method, [], [], $payload);
+    }
+}
+
+class ForceCreateDMOJAccount extends APIRequest {
+    public function __construct($payload = []) {
+        $url = DOMAIN . "/api/v2/users/create";
+        $method = "POST";
+        parent::__construct($url, $method, [], [], $payload);
     }
 }

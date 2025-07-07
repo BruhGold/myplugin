@@ -24,13 +24,15 @@
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/classes/user_data_form.php');
 require_once(__DIR__ . '/classes/requests_to_dmoj.php');
-// Require login
+global $DB;
+// Require login and admin privileges
 require_login();
+require_admin();
 
 // Set up the page
-$PAGE->set_url(new moodle_url('/local/myplugin/index.php'));
+$PAGE->set_url(new moodle_url('/local/myplugin/force_link_dmoj.php'));
 $PAGE->set_context(context_system::instance());
-$PAGE->set_heading(get_string('download_user_data', 'local_myplugin'));
+$PAGE->set_heading(get_string('dmoj_admin_force_link', 'local_myplugin'));
 $PAGE->set_pagelayout('standard');
 
 // Output starts here
@@ -43,7 +45,7 @@ $context = (object)[
 echo $OUTPUT->render_from_template('local_myplugin/index', $context);
 
 // Form section
-$mform = new UserDataForm();
+$mform = new UserForceLinkForm();
 $mform->display();
 
 if ($mform->is_cancelled()) {
@@ -53,20 +55,53 @@ if ($mform->is_cancelled()) {
 } else if ($fromform = $mform->get_data()) {
     // When the form is submitted, and the data is successfully validated,
     // the `get_data()` function will return the data posted in the form.
-    $payload = [
-        'comment_download' => $fromform->comment_download,
-        'submission_download' => $fromform->submission_download,
-        'submission_problem_glob' => $fromform->submission_problem_glob,
-        'submission_results' => $fromform->submission_results,
-    ];
+    $selected_ids = $fromform->unlinked_users ?? [];
 
-    
-    // Prepare downlaod data on DMOJ side
-    $request = new PrepareDownloadData($payload);
+    $payload = [];
+    list($in_sql, $params) = $DB->get_in_or_equal($selected_ids, SQL_PARAMS_NAMED);
+    $users = $DB->get_records_select('user', "id $in_sql", $params);
+
+    foreach ($users as $id => $user) {
+        $payload[$id] = [
+            'username' => $user->username,
+            'email' => $user->email,
+            'first_name' => $user->firstname,
+            'last_name' => $user->lastname,
+        ];
+    }
+
+    // send request to force create DMOJ account
+    $request = new ForceCreateDMOJAccount($payload);
     $response = $request->run();
-    if ($response['status'] != 202) echo $OUTPUT->notification($response['body'], \core\output\notification::NOTIFY_ERROR);
-    else echo $OUTPUT->notification('download data successfully prepared', \core\output\notification::NOTIFY_SUCCESS);
 
+    // get the response and save to db
+    $data = json_decode($response['body'], true);
+    
+    // Handle successful user links
+    if (!empty($data['success'])) {
+        foreach ($data['success'] as $moodleid => $userinfo) {
+            $insertdata = new stdClass();
+            $insertdata->moodle_user_id = (int)$moodleid;
+            $insertdata->dmoj_user_id = $userinfo['dmoj_uid'];
+
+            // Save to database
+            $DB->insert_record('myplugin_dmoj_users', $insertdata);
+            echo $OUTPUT->notification(
+                get_string('dmoj_user_linked', 'local_myplugin', [
+                    'moodleid' => $moodleid,
+                    'dmojuid' => $userinfo['dmoj_uid'],
+                ]),
+                \core\output\notification::NOTIFY_SUCCESS
+            );
+        }
+    }
+
+    // Handle errors
+    if (!empty($data['errors'])) {
+        foreach ($data['errors'] as $moodleid => $errorinfo) {
+            debugging("Failed to link user ID $moodleid: " . json_encode($errorinfo), DEBUG_DEVELOPER);
+        }
+    }
 } else {
     // this came from moodledoc but i found that it is not necessary, since the form will definitely be displayed
     // even if the validated data is incorrect, the form is still there and you can just submit again
@@ -74,24 +109,6 @@ if ($mform->is_cancelled()) {
     // validate and the form should be redisplayed or on the first display of the form.
     // Display the form.
     // $mform->display();
-}
-
-// Display the download URL if available
-$request = new GetDownloadURL();
-$response = $request->run();
-if ($response && isset($response['body'])) {
-    $body = json_decode($response['body'], true);
-
-    if (!empty($body['download_url'])) {
-        $downloadurl = new moodle_url('/local/myplugin/download.php', [
-            'download_url' => $body['download_url']
-        ]);
-
-        $context = (object)[
-            'download_url' => $downloadurl,
-        ];
-        echo $OUTPUT->render_from_template('local_myplugin/download_user_data', $context);
-    }
 }
 echo $OUTPUT->footer();
 ?>
