@@ -62,8 +62,7 @@ class UserDataForm extends moodleform {
             'IE' => 'Internal Error',
             'SC' => 'Short Circuited',
             'AB' => 'Aborted',
-        ];
-        print_r($choices);                                                                                                                                                 
+        ];                                                                                                                                         
         $options = array('multiple' => true,);         
         $mform->addElement('autocomplete', 'submission_results', get_string('searcharea', 'search'), $choices, $options);
         $mform->setType('submission_results', PARAM_RAW);
