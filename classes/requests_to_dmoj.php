@@ -23,6 +23,8 @@
  */
 require_once(__DIR__ . '/api_request.php');
 
+define('DOMAIN', get_config('local_myplugin', 'dmoj_domain') ?: 'http://example.com');
+
 class PrepareDownloadData extends APIRequest {
     public function __construct($payload = []) {
         $url = DOMAIN . "/api/v2/user/download-data";

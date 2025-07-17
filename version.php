@@ -29,5 +29,5 @@ $plugin->version   = 2025062800; // YYYYMMDDXX
 $plugin->requires  = 2021051718; // Required Moodle version
 
 $plugin->dependencies = [
-    'local_oauth' => 2023091301,
+    'local_oauth' => 2023091301, // https://github.com/projectestac/moodle-local_oauth
 ];

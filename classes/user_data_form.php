@@ -102,26 +102,3 @@ class UserDataForm extends moodleform {
         return array();
     }
 }
-
-class UserForceLinkForm extends moodleform {
-
-    function definition() {
-        $mform = $this->_form;
-
-        // User selection
-        $users = get_unlinked_users();
-        $choices = [];
-        foreach ($users as $user) {
-            $choices[$user->id] = $user->id . '.' . $user->username . '(' . $user->email . ' )';
-        }                                                                                                                                    
-        $options = array('multiple' => true,);         
-        $mform->addElement('autocomplete', 'unlinked_users', get_string('searcharea', 'search'), $choices, $options);
-        $mform->setType('unlinked_users', PARAM_RAW);
-
-        $this->add_action_buttons(true, get_string('dmoj_admin_force_link', 'local_myplugin'));
-    }
-
-    function validation($data, $files) {
-        return array();
-    }
-}

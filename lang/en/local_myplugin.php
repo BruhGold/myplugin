@@ -13,3 +13,4 @@ $string['dmoj_link_success'] = 'DMOJ account linked successfully!';
 $string['dmoj_link_failed'] = 'Failed to link DMOJ account. Please try again later.';
 $string['dmoj_admin_force_link'] = 'Force link DMOJ account';
 $string['dmoj_user_linked'] = 'DMOJ user linked successfully! Moodle ID: {$a->moodleid}, DMOJ UID: {$a->dmojuid}';
+$string['event_setting_updated'] = 'DMOJ domain setting updated';

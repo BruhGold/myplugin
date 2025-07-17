@@ -21,9 +21,6 @@
  * @copyright  Dinh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-//$DOMAIN = "http://139.59.105.152";
-#define('DOMAIN', 'http://139.59.105.152');
-define('DOMAIN', 'http://10.126.7.50:4000'); // Change this to your DMOJ domain
 define('TOKEN_OBTAIN_SECRET', "secret");
 
 class APIRequest {
@@ -43,8 +40,9 @@ class APIRequest {
         $this->headers = $headers;
         $this->params = $params;
         $this->payload = $payload;
-        $this->ACCESS_TOKEN_URL = DOMAIN . "/api/token/";
-        $this->REFRESH_TOKEN_URL = DOMAIN . "/api/token/refresh/";
+        $domain = get_config('local_myplugin', 'dmoj_domain');
+        $this->ACCESS_TOKEN_URL = $domain . "/api/token/";
+        $this->REFRESH_TOKEN_URL = $domain . "/api/token/refresh/";
     }
 
     public function send() {

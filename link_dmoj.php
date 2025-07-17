@@ -1,23 +1,71 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Readme file for local customisations
+ *
+ * @package    local_myplugin
+ * @copyright  Dinh
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/classes/sql.php');
 require_once(__DIR__ . '/classes/requests_to_dmoj.php');
-require_login();
+function link_dmoj($user_id = null) {
+    // Require login and admin privileges
+    require_login();
+    require_admin();
 
-$userid = $USER->id;
+    global $DB;
 
-$request = new GetUserDMOJId([$userid]);
-$response = $request->run();
-$body = json_decode($response['body'], true);
-$record = $body[$userid] ?? null;
+    $payload = [];
+    if (!$user_id) {
+        $users = get_all_users();
+    } else {
+        $users = [$user_id => $DB->get_record('user', ['id' => $user_id])];
+    }
 
-if (!empty($record['user_id'])) {
-    $insert = new stdClass();
-    $insert->moodle_user_id = $userid;
-    $insert->dmoj_user_id = $record['user_id'];
-    $DB->insert_record('myplugin_dmoj_users', $insert);
+    foreach ($users as $id => $user) {
+        $payload[$id] = [
+            'username' => $user->username,
+            'email' => $user->email,
+            'first_name' => $user->firstname,
+            'last_name' => $user->lastname,
+        ];
+    }
+    debugging("Linking DMOJ for users: " . json_encode($payload));
 
-    redirect(new moodle_url('/user/profile.php', ['id' => $userid]), get_string('dmoj_link_success', 'local_myplugin'), null, \core\output\notification::NOTIFY_SUCCESS);
-} else {
-    redirect(new moodle_url('/user/profile.php', ['id' => $userid]), get_string('dmoj_link_failed', 'local_myplugin'), null, \core\output\notification::NOTIFY_ERROR);
+    // send request to force create DMOJ account
+    $request = new ForceCreateDMOJAccount($payload);
+    $response = $request->run();
+
+    // get the response and save to db
+    $data = json_decode($response['body'], true);
+        
+    // Handle successful user links
+    if (!empty($data['success'])) {
+        foreach ($data['success'] as $moodleid => $userinfo) {
+            $insertdata = new stdClass();
+            $insertdata->moodle_user_id = (int)$moodleid;
+            $insertdata->dmoj_user_id = $userinfo['dmoj_uid'];
+
+            // Save to database
+            $DB->insert_record('myplugin_dmoj_users', $insertdata);
+            debugging("DMOJ user linked: moodleid = {$moodleid}, dmojuid = {$userinfo['dmoj_uid']}", DEBUG_DEVELOPER);
+        }
+    }
 }
-
+?>

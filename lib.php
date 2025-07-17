@@ -25,26 +25,18 @@ require_once(__DIR__ . '/classes/api_request.php');
 
 function local_myplugin_myprofile_navigation(core_user\output\myprofile\tree $tree, $user, $iscurrentuser, $course) {
     global $DB, $USER;
+    $domain = get_config('local_myplugin', 'dmoj_domain');
     // Create a new category
     $category = new core_user\output\myprofile\category('dmoj', get_string('category_title', 'local_myplugin'), 'miscellaneous');
     
     // add nodes to tree
     $tree->add_category($category);
-
     $check = $DB->get_record('myplugin_dmoj_users', ['moodle_user_id' => $user->id], 'dmoj_user_id');
 
     if (!$check) {
-        // If the user does not have a DMOJ account
-        // create node "create account link button"
-        $linkurl = new moodle_url('/local/myplugin/link_dmoj.php');
-        $url = new moodle_url(DOMAIN . '/login/moodle/', [
-            'next' => $linkurl,
-        ]);
-        $string = get_string('dmoj_link', 'local_myplugin');
-        $node = new core_user\output\myprofile\node('dmoj', 'dmoj_link', $string, null, $url);
-
-        // add the node to the tree
-        $tree->add_node($node);
+        // If the user does not have a DMOJ account, might as well ask the admin to link it for them through the database
+        // I am doing this because the requirement for Capstone is linking should be automatic
+        // If it is not working correctly, maybe some bugs arise and i fucked up
     } else {
         // If the user does have a DMOJ account
         // You should leave all the nodes that need a DMOJ account here
@@ -52,17 +44,5 @@ function local_myplugin_myprofile_navigation(core_user\output\myprofile\tree $tr
         $url = new moodle_url('/local/myplugin/index.php', []);
         $string = get_string('download_user_data', 'local_myplugin');
         $node_download = new core_user\output\myprofile\node('dmoj', 'download_user_data', $string, null, $url);
-
-        // create node "Force link DMOJ account button"
-        if (is_siteadmin($user)) {
-            $url = new moodle_url('/local/myplugin/force_link_dmoj.php');
-            $string = get_string('dmoj_admin_force_link', 'local_myplugin');
-            $node_forcelink = new core_user\output\myprofile\node('dmoj', 'force_link_dmoj', $string, null, $url);
-
-            $tree->add_node($node_forcelink);
-        }
-        
-        // add the nodes to the tree
-        $tree->add_node($node_download);
     }
 }
