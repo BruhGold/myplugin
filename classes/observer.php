@@ -6,9 +6,15 @@ class local_myplugin_observer {
         $userid = $event->userid;
         $newvalue = get_config('local_myplugin', 'dmoj_domain');
 
-        debugging("DMOJ domain was updated to: {$newvalue} by user ID {$userid}");
+        debugging("DMOJ domain is {$newvalue}");
         debugging("Linking DMOJ for user ID: {$event->objectid}");
 
         link_dmoj($event->objectid);
+    }
+
+    public static function unlink_dmoj(\core\event\base $event) {
+        $userid = $event->objectid;
+        debugging("Unlinking DMOJ for user ID: {$userid}");
+        unlink_dmoj($userid);
     }
 }

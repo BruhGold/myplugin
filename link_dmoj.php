@@ -21,6 +21,9 @@
  * @copyright  Dinh
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use MongoDB\Operation\Delete;
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/classes/sql.php');
 require_once(__DIR__ . '/classes/requests_to_dmoj.php');
@@ -66,6 +69,36 @@ function link_dmoj($user_id = null) {
             $DB->insert_record('myplugin_dmoj_users', $insertdata);
             debugging("DMOJ user linked: moodleid = {$moodleid}, dmojuid = {$userinfo['dmoj_uid']}", DEBUG_DEVELOPER);
         }
+    }
+}
+
+function unlink_dmoj($user_id = null) {
+    // Require login and admin privileges
+    require_login();
+    require_admin();
+
+    global $DB;
+
+    if (!$user_id) {
+        $users = get_all_users();
+    } else {
+        $users = [$user_id => $DB->get_record('user', ['id' => $user_id])];
+    }
+
+    foreach ($users as $id => $user) {
+        $params["id"][] = $id;
+    }
+
+    // send request to delete DMOJ account
+    $request = new DeleteDMOJAccount($params);
+    $response = $request->run();
+
+    debugging("Unlinking DMOJ for users with ids: " . json_encode($params));
+
+    // Delete the record from the database
+    foreach ($users as $id => $user) {
+        debugging("Unlinking DMOJ for user: {$user->username}");
+        $DB->delete_records('myplugin_dmoj_users', ['moodle_user_id' => $id]);
     }
 }
 ?>

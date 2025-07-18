@@ -67,3 +67,11 @@ class ForceCreateDMOJAccount extends APIRequest {
         parent::__construct($url, $method, [], [], $payload);
     }
 }
+
+class DeleteDMOJAccount extends APIRequest {
+    public function __construct($params = []) {
+        $url = DOMAIN . "/api/v2/users/create";
+        $method = "DELETE";
+        parent::__construct($url, $method, [], $params, []);
+    }
+}
