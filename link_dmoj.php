@@ -80,10 +80,15 @@ function unlink_dmoj($user_id = null) {
     global $DB;
 
     if (!$user_id) {
-        $users = get_all_users();
+        $allusers = get_all_users();
+        $users = [];
+        foreach ($allusers as $user) {
+            $users = [$user->id => $user];
+        }
     } else {
         $users = [$user_id => $DB->get_record('user', ['id' => $user_id])];
     }
+    $params = [];
 
     foreach ($users as $id => $user) {
         $params["id"][] = $id;
