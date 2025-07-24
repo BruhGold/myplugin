@@ -70,6 +70,7 @@ class APIRequest {
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($this->payload));
             $formattedHeaders[] = 'Content-Type: application/json';
         }
+        $this->url = html_entity_decode($this->url, ENT_QUOTES | ENT_HTML5);
         curl_setopt($ch, CURLOPT_URL, $this->url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);
